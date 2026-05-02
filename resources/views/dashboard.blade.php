@@ -73,24 +73,82 @@
     </div>
 </div>
 
-{{-- Monthly Trend --}}
+{{-- Debt Tracker --}}
 <div class="glass-card rounded-2xl p-6 mb-8">
-    <h3 class="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-        <svg class="w-4 h-4 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/>
-        </svg>
-        Tren 6 Bulan Terakhir
-    </h3>
-    <div class="flex items-end gap-2 h-32">
-        @php $maxVal = max(array_column($monthlyTrend, 'total')) ?: 1; @endphp
-        @foreach($monthlyTrend as $m)
-            <div class="flex-1 flex flex-col items-center gap-1">
-                <span class="text-[10px] text-gray-400 font-medium">Rp {{ number_format($m['total'] / 1000, 0) }}K</span>
-                <div class="w-full rounded-t-lg bg-gradient-to-t from-brand-600 to-brand-400 transition-all duration-500"
-                     style="height: {{ max(($m['total'] / $maxVal) * 100, 4) }}%"></div>
-                <span class="text-[10px] text-gray-500">{{ $m['month'] }}</span>
+    <div class="flex flex-col lg:flex-row items-center gap-6">
+        {{-- Gauge Chart --}}
+        <div class="flex-shrink-0 relative" style="width: 180px; height: 110px;">
+            <canvas id="debtGauge"></canvas>
+            <div class="absolute bottom-0 left-1/2 -translate-x-1/2 text-center">
+                <p class="text-xl font-bold text-white">{{ $persenLunas }}%</p>
+                <p class="text-[9px] text-gray-500 uppercase tracking-wider">Lunas</p>
             </div>
-        @endforeach
+        </div>
+
+        {{-- Debt Info --}}
+        <div class="flex-1 w-full">
+            <div class="flex items-center gap-2 mb-4">
+                <svg class="w-4 h-4 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
+                </svg>
+                <h3 class="text-sm font-semibold text-white">Sisa Hutang</h3>
+            </div>
+
+            {{-- Progress Bar --}}
+            <div class="w-full bg-white/5 rounded-full h-3 mb-4 overflow-hidden">
+                <div class="h-full rounded-full bg-gradient-to-r from-brand-600 via-brand-500 to-brand-400 transition-all duration-1000 ease-out"
+                     style="width: {{ $persenLunas }}%"></div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-4">
+                <div>
+                    <p class="text-[10px] text-gray-500 uppercase tracking-wider mb-1">Total Hutang</p>
+                    <p class="text-sm font-bold text-white">Rp {{ number_format($totalHutang, 0, ',', '.') }}</p>
+                </div>
+                <div>
+                    <p class="text-[10px] text-gray-500 uppercase tracking-wider mb-1">Sudah Dibayar</p>
+                    <p class="text-sm font-bold text-brand-400">Rp {{ number_format($sudahDibayar, 0, ',', '.') }}</p>
+                </div>
+                <div>
+                    <p class="text-[10px] text-gray-500 uppercase tracking-wider mb-1">Sisa</p>
+                    <p class="text-sm font-bold {{ $sisaHutang > 0 ? 'text-amber-400' : 'text-brand-400' }}">Rp {{ number_format($sisaHutang, 0, ',', '.') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Charts Row --}}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+    {{-- Line + Bar Chart: 6 Month Trend --}}
+    <div class="lg:col-span-2 glass-card rounded-2xl p-6">
+        <h3 class="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+            <svg class="w-4 h-4 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/>
+            </svg>
+            Tren 6 Bulan Terakhir
+        </h3>
+        <div class="relative" style="height: 260px;">
+            <canvas id="trendChart"></canvas>
+        </div>
+    </div>
+
+    {{-- Doughnut Chart: Transaction Count per Month --}}
+    <div class="glass-card rounded-2xl p-6">
+        <h3 class="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+            <svg class="w-4 h-4 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
+            </svg>
+            Distribusi per Bulan
+        </h3>
+        <div class="relative flex items-center justify-center" style="height: 220px;">
+            <canvas id="doughnutChart"></canvas>
+        </div>
+        <div class="mt-3 text-center">
+            <p class="text-2xl font-bold text-white">{{ $countAll }}</p>
+            <p class="text-[10px] text-gray-500 uppercase tracking-wider">Total Transaksi</p>
+        </div>
     </div>
 </div>
 
@@ -206,4 +264,176 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const labels = {!! json_encode(array_column($monthlyTrend, 'month')) !!};
+    const totals = {!! json_encode(array_map(fn($m) => $m['total'], $monthlyTrend)) !!};
+    const counts = {!! json_encode(array_map(fn($m) => $m['count'], $monthlyTrend)) !!};
+
+    Chart.defaults.color = '#94a3b8';
+    Chart.defaults.font.family = 'Inter';
+
+    // Trend Chart (Line + Bar combo)
+    new Chart(document.getElementById('trendChart'), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Total (Rp)',
+                    data: totals,
+                    type: 'line',
+                    borderColor: '#8b5cf6',
+                    backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                    borderWidth: 2.5,
+                    pointBackgroundColor: '#8b5cf6',
+                    pointBorderColor: '#1e293b',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    fill: true,
+                    tension: 0.4,
+                    yAxisID: 'y',
+                },
+                {
+                    label: 'Jumlah Transaksi',
+                    data: counts,
+                    backgroundColor: 'rgba(167, 139, 250, 0.3)',
+                    borderColor: 'rgba(167, 139, 250, 0.6)',
+                    borderWidth: 1,
+                    borderRadius: 6,
+                    yAxisID: 'y1',
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: {
+                    labels: { usePointStyle: true, pointStyle: 'circle', padding: 16, font: { size: 11 } }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                    borderColor: 'rgba(139, 92, 246, 0.3)',
+                    borderWidth: 1,
+                    titleFont: { weight: '600' },
+                    padding: 12,
+                    callbacks: {
+                        label: function(ctx) {
+                            if (ctx.dataset.yAxisID === 'y') {
+                                return 'Total: Rp ' + ctx.raw.toLocaleString('id-ID');
+                            }
+                            return 'Transaksi: ' + ctx.raw;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { color: 'rgba(255,255,255,0.03)' },
+                    ticks: { font: { size: 10 } }
+                },
+                y: {
+                    position: 'left',
+                    grid: { color: 'rgba(255,255,255,0.03)' },
+                    ticks: {
+                        font: { size: 10 },
+                        callback: v => 'Rp ' + (v/1000) + 'K'
+                    }
+                },
+                y1: {
+                    position: 'right',
+                    grid: { display: false },
+                    ticks: {
+                        font: { size: 10 },
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+
+    // Doughnut Chart
+    const doughnutColors = ['#8b5cf6', '#a78bfa', '#c4b5fd', '#7c3aed', '#6d28d9', '#ddd6fe'];
+    new Chart(document.getElementById('doughnutChart'), {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: counts,
+                backgroundColor: doughnutColors,
+                borderColor: 'rgba(15, 23, 42, 0.8)',
+                borderWidth: 3,
+                hoverOffset: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '65%',
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom',
+                    labels: { usePointStyle: true, pointStyle: 'circle', padding: 10, font: { size: 9 }, boxWidth: 8 }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                    borderColor: 'rgba(139, 92, 246, 0.3)',
+                    borderWidth: 1,
+                    padding: 10,
+                    callbacks: {
+                        label: function(ctx) {
+                            return ctx.label + ': ' + ctx.raw + ' transaksi';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Debt Gauge Chart (half doughnut)
+    const paid = {{ $sudahDibayar }};
+    const remaining = {{ $sisaHutang }};
+    new Chart(document.getElementById('debtGauge'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Sudah Dibayar', 'Sisa Hutang'],
+            datasets: [{
+                data: [paid, remaining],
+                backgroundColor: ['#8b5cf6', 'rgba(255,255,255,0.06)'],
+                borderColor: ['#7c3aed', 'rgba(255,255,255,0.03)'],
+                borderWidth: 2,
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            rotation: -90,
+            circumference: 180,
+            cutout: '75%',
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                    borderColor: 'rgba(139, 92, 246, 0.3)',
+                    borderWidth: 1,
+                    padding: 10,
+                    callbacks: {
+                        label: function(ctx) {
+                            return ctx.label + ': Rp ' + ctx.raw.toLocaleString('id-ID');
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
 @endsection

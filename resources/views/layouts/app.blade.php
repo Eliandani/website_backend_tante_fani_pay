@@ -5,10 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="TanteFaniPay - Aplikasi Pencatatan Kiriman">
     <title>@yield('title', 'Dashboard') — TanteFaniPay</title>
+    <link rel="icon" type="image/png" href="/images/icon_fanipay.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -62,9 +64,7 @@
 <aside id="sidebar" class="glass fixed lg:sticky top-0 left-0 h-screen w-64 z-50 flex flex-col transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
     <div class="p-6 border-b border-white/5">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center shadow-lg shadow-brand-500/20">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/></svg>
-            </div>
+            <img src="/images/icon_fanipay.png" alt="TanteFaniPay" class="w-10 h-10 rounded-xl shadow-lg shadow-brand-500/20 object-cover">
             <div>
                 <h1 class="text-base font-bold text-white tracking-tight">TanteFaniPay</h1>
                 <p class="text-[10px] text-gray-400 uppercase tracking-widest">Pencatatan Kiriman</p>

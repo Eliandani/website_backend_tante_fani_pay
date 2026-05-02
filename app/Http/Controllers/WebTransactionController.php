@@ -58,6 +58,12 @@ class WebTransactionController extends Controller
             ? round((($totalThisMonth - $totalLastMonth) / $totalLastMonth) * 100, 1)
             : ($totalThisMonth > 0 ? 100 : 0);
 
+        // Debt tracking (sisa hutang)
+        $totalHutang = 45000000; // Rp 45.000.000
+        $sudahDibayar = $totalAll;
+        $sisaHutang = max($totalHutang - $sudahDibayar, 0);
+        $persenLunas = $totalHutang > 0 ? min(round(($sudahDibayar / $totalHutang) * 100, 1), 100) : 0;
+
         return view('dashboard', compact(
             'totalAll',
             'totalThisMonth',
@@ -68,7 +74,11 @@ class WebTransactionController extends Controller
             'highestTransaction',
             'monthlyTrend',
             'recentTransactions',
-            'monthChange'
+            'monthChange',
+            'totalHutang',
+            'sudahDibayar',
+            'sisaHutang',
+            'persenLunas'
         ));
     }
 

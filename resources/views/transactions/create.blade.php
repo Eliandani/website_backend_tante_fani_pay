@@ -16,15 +16,31 @@
             </h3>
         </div>
 
-        <form method="POST" action="{{ route('transaksi.store') }}" class="p-6 space-y-5">
+        <form method="POST" action="{{ route('transaksi.store') }}" class="p-6 space-y-5" id="transactionForm">
             @csrf
 
             {{-- Amount --}}
             <div>
-                <label for="amount" class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2 block">Jumlah (Rp) *</label>
-                <input type="number" id="amount" name="amount" value="{{ old('amount') }}" step="0.01" min="0" required
-                       placeholder="Masukkan jumlah kiriman..."
-                       class="w-full bg-dark-950/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-gray-200 placeholder-gray-500 focus:border-brand-500/50 transition-colors @error('amount') border-red-500/50 @enderror">
+                <label for="amount_display" class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2 block">Jumlah (Rp) *</label>
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-gray-500 font-medium">Rp</span>
+                    <input type="text" id="amount_display" inputmode="numeric" required
+                           value="{{ old('amount') ? number_format(old('amount'), 0, ',', '.') : '' }}"
+                           placeholder="0"
+                           class="w-full bg-dark-950/50 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-gray-200 placeholder-gray-500 focus:border-brand-500/50 transition-colors @error('amount') border-red-500/50 @enderror">
+                    <input type="hidden" id="amount" name="amount" value="{{ old('amount') }}">
+                </div>
+
+                {{-- Quick Amount Buttons --}}
+                <div class="flex flex-wrap gap-2 mt-3">
+                    @foreach([50000, 100000, 150000, 200000, 250000, 300000, 350000, 400000, 450000, 500000] as $preset)
+                        <button type="button" onclick="setAmount({{ $preset }})"
+                                class="quick-amount px-3 py-1.5 rounded-lg text-xs font-medium border border-white/10 text-gray-400 hover:text-brand-400 hover:border-brand-500/30 hover:bg-brand-500/5 transition-all duration-200">
+                            {{ number_format($preset, 0, ',', '.') }}
+                        </button>
+                    @endforeach
+                </div>
+
                 @error('amount')
                     <p class="text-xs text-red-400 mt-1.5 flex items-center gap-1">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -72,4 +88,59 @@
         </form>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+const display = document.getElementById('amount_display');
+const hidden = document.getElementById('amount');
+
+function formatNumber(num) {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+function parseFormatted(str) {
+    return parseInt(str.replace(/\./g, ''), 10) || 0;
+}
+
+function setAmount(val) {
+    hidden.value = val;
+    display.value = formatNumber(val);
+    // Highlight the selected button
+    document.querySelectorAll('.quick-amount').forEach(btn => {
+        const btnVal = parseInt(btn.textContent.replace(/\./g, ''), 10);
+        if (btnVal === val) {
+            btn.classList.add('border-brand-500/50', 'text-brand-400', 'bg-brand-500/10');
+            btn.classList.remove('text-gray-400', 'border-white/10');
+        } else {
+            btn.classList.remove('border-brand-500/50', 'text-brand-400', 'bg-brand-500/10');
+            btn.classList.add('text-gray-400', 'border-white/10');
+        }
+    });
+}
+
+display.addEventListener('input', function(e) {
+    let raw = this.value.replace(/\D/g, '');
+    if (raw === '') {
+        this.value = '';
+        hidden.value = '';
+        return;
+    }
+    let num = parseInt(raw, 10);
+    this.value = formatNumber(num);
+    hidden.value = num;
+
+    // Update button highlights
+    document.querySelectorAll('.quick-amount').forEach(btn => {
+        const btnVal = parseInt(btn.textContent.replace(/\./g, ''), 10);
+        if (btnVal === num) {
+            btn.classList.add('border-brand-500/50', 'text-brand-400', 'bg-brand-500/10');
+            btn.classList.remove('text-gray-400', 'border-white/10');
+        } else {
+            btn.classList.remove('border-brand-500/50', 'text-brand-400', 'bg-brand-500/10');
+            btn.classList.add('text-gray-400', 'border-white/10');
+        }
+    });
+});
+</script>
 @endsection

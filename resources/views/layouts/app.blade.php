@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="TanteFaniPay - Aplikasi Pencatatan Kiriman">
     <title>@yield('title', 'Dashboard') — TanteFaniPay</title>
-    <link rel="icon" type="image/png" href="/images/icon_fanipay.png">
+    <link rel="icon" type="image/png" href="{{ asset('images/icon_fanipay.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -64,7 +64,7 @@
 <aside id="sidebar" class="glass fixed lg:sticky top-0 left-0 h-screen w-64 z-50 flex flex-col transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
     <div class="p-6 border-b border-white/5">
         <div class="flex items-center gap-3">
-            <img src="/images/icon_fanipay.png" alt="TanteFaniPay" class="w-10 h-10 rounded-xl shadow-lg shadow-brand-500/20 object-cover">
+            <img src="{{ asset('images/icon_fanipay.png') }}" alt="TanteFaniPay" class="w-11 h-11 rounded-xl shadow-lg shadow-brand-500/20 object-contain bg-brand-700 p-0.5">
             <div>
                 <h1 class="text-base font-bold text-white tracking-tight">TanteFaniPay</h1>
                 <p class="text-[10px] text-gray-400 uppercase tracking-widest">Pencatatan Kiriman</p>
@@ -76,20 +76,41 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
             Dashboard
         </a>
-        <a href="{{ route('transaksi.index') }}" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 {{ request()->routeIs('transaksi.*') ? 'active' : '' }}">
+        <a href="{{ route('transaksi.index') }}" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 {{ request()->routeIs('transaksi.index', 'transaksi.edit', 'transaksi.show') ? 'active' : '' }}">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
             Daftar Transaksi
         </a>
-        <a href="{{ route('transaksi.create') }}" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5">
+        <a href="{{ route('transaksi.create') }}" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 {{ request()->routeIs('transaksi.create') ? 'active' : '' }}">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4"/></svg>
             Tambah Transaksi
         </a>
     </nav>
-    <div class="p-4 border-t border-white/5">
+    <div class="p-4 border-t border-white/5 space-y-2">
         <div class="glass-card rounded-lg p-3">
-            <p class="text-xs text-gray-400">Versi 1.0</p>
-            <p class="text-[10px] text-gray-500 mt-1">&copy; {{ date('Y') }} TanteFaniPay</p>
+            <div class="flex items-center gap-2.5 mb-2">
+                <div class="w-7 h-7 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white text-[10px] font-bold">
+                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs font-semibold text-white truncate">{{ Auth::user()->name }}</p>
+                    <p class="text-[9px] text-gray-500">Online</p>
+                </div>
+            </div>
+            <div class="flex gap-1.5">
+                <a href="{{ route('password.change') }}" class="flex-1 text-center text-[10px] text-gray-400 hover:text-brand-400 py-1.5 rounded-md hover:bg-white/5 transition-colors" title="Ubah Password">
+                    <svg class="w-3 h-3 inline mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+                    Ubah Password
+                </a>
+                <form method="POST" action="{{ route('logout') }}" class="flex-1">
+                    @csrf
+                    <button type="submit" class="w-full text-[10px] text-gray-400 hover:text-red-400 py-1.5 rounded-md hover:bg-white/5 transition-colors">
+                        <svg class="w-3 h-3 inline mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                        Keluar
+                    </button>
+                </form>
+            </div>
         </div>
+        <p class="text-[9px] text-gray-600 text-center">&copy; {{ date('Y') }} TanteFaniPay</p>
     </div>
 </aside>
 <div class="flex-1 flex flex-col min-w-0">
@@ -103,7 +124,9 @@
         </div>
         <div class="flex items-center gap-3">
             <span class="text-xs text-gray-400 hidden sm:block">{{ now()->translatedFormat('l, d F Y') }}</span>
-            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white text-sm font-bold shadow-lg shadow-brand-500/20">TF</div>
+            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white text-sm font-bold shadow-lg shadow-brand-500/20">
+                {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
+            </div>
         </div>
     </header>
     <main class="flex-1 p-4 lg:p-8 fade-in">@yield('content')</main>
